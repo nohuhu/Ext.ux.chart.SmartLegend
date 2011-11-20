@@ -1,0 +1,22 @@
+Ext.ux.chart.SmartLegend
+========================
+
+This class is an extension for Ext JS 4 that implements chart Legend with
+more advanced behavior than stock Legend.
+
+Features:
+    - Legend items sizes are adjusted to font size
+    - Legend items can be configured to display any particular text,
+      not only fixed Series titles or values
+    - Legend draws itself in several rows or columns, depending on the
+      orientation.
+
+Note that this class is based on Ext.ux.chart.Legend class, which is
+basically the same as Ext.chart.Legend except that some methods were
+refactored for better reuse. The same goes for Ext.ux.chart.LegendItem.
+
+This extension is released under GPL 3.0 license, except for
+Ext.ux.chart.Legend and Ext.ux.chart.LegendItem classes which are
+provided as an example. Commercial licensing is also available.
+
+Copyright (c) 2011 by Alexander Tokarev, <nohuhu@nohuhu.org>.
