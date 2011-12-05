@@ -4,7 +4,7 @@
     
     Uses Smart legend item to provide explicit Series field titles, too.
 
-    Version 0.9.
+    Version 0.91.
     
     Copyright (C) 2011 Alexander Tokarev.
     

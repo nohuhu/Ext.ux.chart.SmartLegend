@@ -1,7 +1,7 @@
 /*
     Legend item that supports explicit item titles as well as other improvements.
 
-    Version 0.9.
+    Version 0.91.
     
     Copyright (C) 2011 Alexander Tokarev.
 
