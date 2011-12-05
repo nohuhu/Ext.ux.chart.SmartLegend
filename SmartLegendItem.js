@@ -63,7 +63,7 @@ Ext.define('Ext.ux.chart.SmartLegendItem', {
         if ( marker = me.get('box') ) {
             marker.setAttributes({
                     width:  fontHeight,
-                    height: fontHeight,
+                    height: fontHeight
             }, true);
         };
         
