@@ -17,6 +17,10 @@ refactored for better reuse. The same goes for Ext.ux.chart.LegendItem.
 
 This extension is released under GPL 3.0 license, except for
 Ext.ux.chart.Legend and Ext.ux.chart.LegendItem classes which are
-provided as an example. Commercial licensing is also available.
+provided as an example. 
 
-Copyright (c) 2011 by Alexander Tokarev, <nohuhu@nohuhu.org>.
+Commercial use is permitted to the extent that the code/component(s) do NOT
+become part of another Open Source or Commercially licensed development
+library or toolkit without explicit permission.
+
+Copyright (c) 2011-2012 by Alexander Tokarev, <nohuhu@nohuhu.org>.

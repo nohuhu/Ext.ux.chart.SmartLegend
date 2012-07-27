@@ -18,17 +18,25 @@ Ext.define('Ext.ux.chart.Legend', {
      * @private Create all the sprites for the legend
      */
     create: function() {
-        var me = this;
+        var me = this,
+            items = me.chart.series.items;
+        
         me.createBox();
-        me.createItems();
+        
+        if (me.rebuild !== false) {
+            me.createItems();
+        };
+        
         if (!me.created && me.isDisplayed()) {
             me.created = true;
 
             // Listen for changes to series titles to trigger regeneration of the legend
-            me.chart.series.each(function(series) {
+            for ( var i = 0, l = items.length; i < l; i++ ) {
+                var series = items[i];
+                
                 series.on('titlechange', me.redraw, me);
-            });
-        }
+            };
+        };
     },
     
     /**
@@ -46,20 +54,25 @@ Ext.define('Ext.ux.chart.Legend', {
      */
     createItems: function() {
         var me = this,
-            chart = me.chart,
-            items = me.items;
+            seriesItems = me.chart.series.items,
+            items = me.items,
+            fields;
 
         //remove all legend items
         me.removeItems();
         
         // Create all the item labels
-        chart.series.each(function(series, i) {
+        for ( var i = 0, li = seriesItems.length; i < li; i++ ) {
+            var series = seriesItems[i];
+            
             if (series.showInLegend) {
-                Ext.each([].concat(series.yField), function(field, j) {
-                    items.push(me.createLegendItem(series, j));
-                }, this);
+                fields = [].concat(series.yField);
+                
+                for ( var j = 0, lj = fields.length; j < lj; j++ ) {
+                    items.push( me.createLegendItem(series, j) );
+                };
             }
-        }, me);
+        };
         
         me.alignItems();
     },
@@ -126,16 +139,20 @@ Ext.define('Ext.ux.chart.Legend', {
             vertical = me.isVertical,
             math = Math,
             mfloor = math.floor,
-            mmax = math.max;
+            mmax = math.max,
+            spacing = 0;
 
         // Collect item dimensions and position each one
         // properly in relation to the previous item
-        Ext.each(me.items, function(item, i) {
-            var bbox = item.getBBox();
+        for ( var i = 0, l = items.length; i < l; i++ ) {
+            var item = items[i],
+                bbox, width, height;
+                
+            bbox = item.getBBox();
 
             //always measure from x=0, since not all markers go all the way to the left
-            var width = bbox.width,
-                height = bbox.height;
+            width  = bbox.width;
+            height = bbox.height;
 
             if (i === 0) {
                 spacing = vertical ? padding + height / 2 : padding;
@@ -150,9 +167,9 @@ Ext.define('Ext.ux.chart.Legend', {
             // Collect cumulative dimensions
             totalWidth += width + spacing;
             totalHeight += height + spacing;
-            maxWidth = mmax(maxWidth, width);
+            maxWidth  = mmax(maxWidth, width);
             maxHeight = mmax(maxHeight, height);
-        }, me);
+        };
 
         return {
             totalWidth:  totalWidth,
@@ -212,7 +229,8 @@ Ext.define('Ext.ux.chart.Legend', {
      * @private Update the position of all the legend's sprites to match its current x/y values
      */
     updatePosition: function() {
-        var me = this;
+        var me = this,
+            items = me.items;
 
         if (me.isDisplayed()) {
             // Find the position based on the dimensions
@@ -222,9 +240,9 @@ Ext.define('Ext.ux.chart.Legend', {
             me.y = pos.y;
 
             // Update the position of each item
-            Ext.each(me.items, function(item) {
-                item.updatePosition();
-            });
+            for ( var i = 0, l = items.length; i < l; i++ ) {
+                items[i].updatePosition();
+            };
             // Update the position of the outer box
             me.boxSprite.setAttributes(me.getBBox(), true);
         }
@@ -244,5 +262,3 @@ Ext.define('Ext.ux.chart.Legend', {
         });
     }
 });
-
-//@ sourceURL=uxLegend.js

@@ -1,23 +1,17 @@
 /*
-    Legend item that supports explicit item titles as well as other improvements.
-
-    Version 0.91.
-    
-    Copyright (C) 2011 Alexander Tokarev.
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Legend item that supports explicit item titles as well as other improvements.
+ *
+ * Version 0.99, compatible with Ext JS 4.1
+ *  
+ * Copyright (c) 2011-2012 Alexander Tokarev.
+ *
+ * This code is licensed under the terms of the Open Source LGPL 3.0 license.
+ * Commercial use is permitted to the extent that the code/component(s) do NOT
+ * become part of another Open Source or Commercially licensed development library
+ * or toolkit without explicit permission.
+ * 
+ * License details: http://www.gnu.org/licenses/lgpl.html
+ */
 
 Ext.define('Ext.ux.chart.SmartLegendItem', {
     extend: 'Ext.ux.chart.LegendItem',
@@ -38,25 +32,57 @@ Ext.define('Ext.ux.chart.SmartLegendItem', {
     },
     
     /**
+     * @private Creates Series marker Sprites.
+     */
+    createSeriesMarkers: function(config) {
+        var me = this,
+            index = config.yFieldIndex,
+            series = me.series,
+            seriesType = me.seriesType || series.type,
+            surface = me.surface,
+            z = me.zIndex;
+
+        // Line series - display as short line with optional marker in the middle
+        if (seriesType === 'line' || seriesType === 'scatter') {
+            if(seriesType === 'line') {
+                var seriesStyle = Ext.apply(series.seriesStyle, series.style);
+                me.drawLine(0.5, 0.5, 16.5, 0.5, z, seriesStyle);
+            };
+            
+            if (series.showMarkers || seriesType === 'scatter') {
+                var markerConfig = Ext.apply(series.markerStyle, series.markerConfig || {}, {
+                    fill: series.getLegendColor(index)
+                });
+                me.drawMarker(8.5, 0.5, z, markerConfig);
+            }
+        }
+        // All other series types - display as filled box
+        else {
+            me.drawFilledBox(12, 12, z, index);
+        }
+    },
+    
+    /**
      * @private Places Legend item sprites so that they take minimal space
      * without sacrificing sexy looks.
      */
      updatePosition: function(relativeTo) {
         var me = this,
             items = me.items,
-            series = me.series,
-            seriesType = series.type,
-            marker,
-            bbox, fontHeight, halfFontHeight, textOffset, itemHeight;
+            seriesType = me.seriesType || me.series.type,
+            mfloor = Math.floor,
+            marker, markerBBox, textBBox,
+            bbox, fontHeight, halfFontHeight, textOffset, itemHeight, attr;
         
         if ( !relativeTo ) {
             relativeTo = me.legend;
         };
         
         // Calculate font height first, item's dimensions are based on it
+        bbox           = me.getBBox();
         textBBox       = me.label.getBBox();
         fontHeight     = textBBox.height;
-        halfFontHeight = Ext.util.Format.round(fontHeight / 2, 0);
+        halfFontHeight = mfloor(fontHeight / 2);
         
         // For other Series than Line and Scatter, marker sprite is a color filled box.
         // Its dimensions should match text font size.
@@ -72,13 +98,6 @@ Ext.define('Ext.ux.chart.SmartLegendItem', {
                    : seriesType == 'scatter' ? me.get('marker').getBBox()
                    :                           marker.getBBox() || me.get('box').getBBox()
                    ;
-        textOffset = markerBBox.x + markerBBox.width + me.legend.padding;
-        
-        // Mask sprite height equals overall Item height and it's set
-        // approximately twice font height to give Items some breathing space
-        me.mask.setAttributes({
-            height: fontHeight * 2
-        }, false);
         
         // Now go over items and adjust their positions and dimensions
         for ( var i = 0, l = items.length; i < l; i++ ) {
@@ -86,26 +105,46 @@ Ext.define('Ext.ux.chart.SmartLegendItem', {
             
             switch ( item.type ) {
             case 'text':
-                item.setAttributes({
-                    x: textOffset + relativeTo.x + me.x,
-                    y: relativeTo.y + me.y
-                }, true);
+                attr = {
+                    x: mfloor(relativeTo.x + me.x + markerBBox.width + me.legend.padding),
+                    y: mfloor(relativeTo.y + me.y + (bbox.height - fontHeight - 1) / 2)
+                };
+                
+                item.setAttributes(attr, true);
                 break;
             case 'rect':
-                item.setAttributes({
-                    translate: {
-                        x: relativeTo.x + me.x,
-                        y: relativeTo.y + me.y - halfFontHeight
-                    }
-                }, true);
+                if ( Ext.isIE6 || Ext.isIE7 || Ext.isIE8 ) {
+                    attr = {
+                        translate: {
+                            x: mfloor(relativeTo.x + me.x),
+                            y: mfloor(relativeTo.y + me.y - (bbox.height - fontHeight + 2) / 2)
+                        }
+                    };
+                }
+                else if ( Ext.isIE ) {
+                    attr = {
+                        x: mfloor(relativeTo.x + me.x),
+                        y: mfloor(relativeTo.y + me.y - (bbox.height - fontHeight) / 2)
+                    };
+                }
+                else {
+                    attr = {
+                        x: mfloor(relativeTo.x + me.x),
+                        y: mfloor(relativeTo.y + me.y - (bbox.height - fontHeight + 2) / 2)
+                    };
+                };
+                
+                item.setAttributes(attr, true);
                 break;
             default:
-                item.setAttributes({
+                attr = {
                     translate: {
-                        x: relativeTo.x + me.x,
-                        y: relativeTo.y + me.y
+                        x: mfloor(relativeTo.x + me.x),
+                        y: mfloor(relativeTo.y + me.y + (bbox.height - fontHeight - 2) / 2)
                     }
-                }, true);
+                };
+                
+                item.setAttributes(attr, true);
             };
         };
      }

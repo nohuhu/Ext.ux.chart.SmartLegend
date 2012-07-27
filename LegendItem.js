@@ -35,6 +35,8 @@ Ext.define('Ext.ux.chart.LegendItem', {
         }, true);
         
         me.mask = me.createMask(config);
+        
+        me.yFieldIndex = index;
 
         // Add event listeners
         me.on('mouseover', me.onMouseOver, me);
@@ -72,15 +74,20 @@ Ext.define('Ext.ux.chart.LegendItem', {
      * @private Creates label sprite.
      */
     createLabel: function(config) {
-        var me = this;
+        var me = this,
+            legend = me.legend;
         
         return me.add('label', me.surface.add({
             type: 'text',
             x: 20,
             y: 0,
-            zIndex: me.zIndex || 0,
-            font: me.legend.labelFont,
-            text: me.getLabelText()
+            zIndex: (me.zIndex || 0) + 2,
+            fill: legend.labelColor,
+            font: legend.labelFont,
+            text: me.getLabelText(),
+            style: {
+                cursor: 'pointer'
+            }
         }));
     },
     
@@ -90,6 +97,7 @@ Ext.define('Ext.ux.chart.LegendItem', {
     createMask: function(config) {
         var me = this,
             surface = me.surface,
+            legend = me.legend,
             bbox;
         
         bbox = me.getBBox();
@@ -100,9 +108,8 @@ Ext.define('Ext.ux.chart.LegendItem', {
             y: bbox.y,
             width: bbox.width || 20,
             height: bbox.height || 20,
-            zIndex: (me.zIndex || 0) + 1000,
-            fill: '#f00',
-            opacity: 0,
+            zIndex: (me.zIndex || 0) + 1,
+            fill: legend.boxFill,
             style: {
                 'cursor': 'pointer'
             }
@@ -128,7 +135,9 @@ Ext.define('Ext.ux.chart.LegendItem', {
             };
             
             if (series.showMarkers || seriesType === 'scatter') {
-                var markerConfig = Ext.apply(series.markerStyle, series.markerConfig || {});
+                var markerConfig = Ext.apply(series.markerStyle, series.markerConfig || {}, {
+                    fill: series.getLegendColor(index)
+                });
                 me.drawMarker(8.5, 0.5, z, markerConfig);
             }
         }
@@ -149,11 +158,11 @@ Ext.define('Ext.ux.chart.LegendItem', {
         return me.add('line', surface.add({
             type: 'path',
             path: 'M' + fromX + ',' + fromY + 'L' + toX + ',' + toY,
-            zIndex: z,
+            zIndex: (z || 0) + 2,
             "stroke-width": series.lineWidth,
             "stroke-linejoin": "round",
             "stroke-dasharray": series.dash,
-            stroke: seriesStyle.stroke || '#000',
+            stroke: seriesStyle.stroke || series.getLegendColor(index) || '#000',
             style: {
                 cursor: 'pointer'
             }
@@ -172,7 +181,7 @@ Ext.define('Ext.ux.chart.LegendItem', {
             fill: markerConfig.fill,
             x: x,
             y: y,
-            zIndex: z,
+            zIndex: (z || 0) + 2,
             radius: markerConfig.radius || markerConfig.size,
             style: {
                 cursor: 'pointer'
@@ -190,7 +199,7 @@ Ext.define('Ext.ux.chart.LegendItem', {
             
         return me.add('box', surface.add({
             type: 'rect',
-            zIndex: z,
+            zIndex: (z || 0) + 2,
             x: 0,
             y: 0,
             width: width,
@@ -222,10 +231,12 @@ Ext.define('Ext.ux.chart.LegendItem', {
      * @private Draws label in normal when mouse cursor leaves the item.
      */
     onMouseOut: function() {
-        var me = this;
+        var me = this,
+            legend = me.legend,
+            boldRe = me.boldRe;
 
         me.label.setStyle({
-            'font-weight': 'normal'
+            'font-weight': legend.labelFont && boldRe.test(legend.labelFont) ? 'bold' : 'normal'
         });
         me.series._index = me.yFieldIndex;
         me.series.unHighlightItem();
@@ -235,15 +246,16 @@ Ext.define('Ext.ux.chart.LegendItem', {
      * @private Toggles Series visibility upon mouse click on the item.
      */
     onMouseDown: function() {
-        var me = this;
+        var me = this,
+            index = me.yFieldIndex;
 
         if (!me.hiddenSeries) {
-            me.series.hideAll();
+            me.series.hideAll(index);
             me.label.setAttributes({
                 opacity: 0.5
             }, true);
         } else {
-            me.series.showAll();
+            me.series.showAll(index);
             me.label.setAttributes({
                 opacity: 1
             }, true);
@@ -251,5 +263,3 @@ Ext.define('Ext.ux.chart.LegendItem', {
         me.hiddenSeries = !me.hiddenSeries; 
     }
 });
-
-//@ sourceURL=uxLegendItem.js
