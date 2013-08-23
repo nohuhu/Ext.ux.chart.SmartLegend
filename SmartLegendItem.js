@@ -46,7 +46,7 @@ Ext.define('Ext.ux.chart.SmartLegendItem', {
         if (seriesType === 'line' || seriesType === 'scatter') {
             if(seriesType === 'line') {
                 var seriesStyle = Ext.apply(series.seriesStyle, series.style);
-                me.drawLine(0.5, 0.5, 16.5, 0.5, z, seriesStyle);
+                me.drawLine(0.5, 0.5, 16.5, 0.5, z, seriesStyle, index);
             };
             
             if (series.showMarkers || seriesType === 'scatter') {
