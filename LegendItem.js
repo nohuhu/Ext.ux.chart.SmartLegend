@@ -131,7 +131,7 @@ Ext.define('Ext.ux.chart.LegendItem', {
         if (seriesType === 'line' || seriesType === 'scatter') {
             if(seriesType === 'line') {
                 var seriesStyle = Ext.apply(series.seriesStyle, series.style);
-                me.drawLine(0.5, 0.5, 16.5, 0.5, z, seriesStyle);
+                me.drawLine(0.5, 0.5, 16.5, 0.5, z, seriesStyle, index);
             };
             
             if (series.showMarkers || seriesType === 'scatter') {
@@ -150,7 +150,7 @@ Ext.define('Ext.ux.chart.LegendItem', {
     /**
      * @private Creates line sprite for Line series.
      */
-    drawLine: function(fromX, fromY, toX, toY, z, seriesStyle) {
+    drawLine: function(fromX, fromY, toX, toY, z, seriesStyle, index) {
         var me = this,
             surface = me.surface,
             series = me.series;
