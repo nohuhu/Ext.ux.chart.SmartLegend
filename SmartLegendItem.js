@@ -45,12 +45,12 @@ Ext.define('Ext.ux.chart.SmartLegendItem', {
         // Line series - display as short line with optional marker in the middle
         if (seriesType === 'line' || seriesType === 'scatter') {
             if(seriesType === 'line') {
-                var seriesStyle = Ext.apply(series.seriesStyle, series.style);
-                me.drawLine(0.5, 0.5, 16.5, 0.5, z, seriesStyle);
+                var seriesStyle = Ext.apply(series.seriesStyle || {}, series.style);
+                me.drawLine(0.5, 0.5, 16.5, 0.5, z, seriesStyle, index);
             };
             
             if (series.showMarkers || seriesType === 'scatter') {
-                var markerConfig = Ext.apply(series.markerStyle, series.markerConfig || {}, {
+                var markerConfig = Ext.apply(series.markerStyle || {}, series.markerConfig || {}, {
                     fill: series.getLegendColor(index)
                 });
                 me.drawMarker(8.5, 0.5, z, markerConfig);
